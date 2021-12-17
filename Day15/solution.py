@@ -16,8 +16,8 @@ def get_neighbors(node: tuple, mode: int = 2):
             yield n
 
 
-def get_node_cost(graph, node):
-    """ For part 2 """
+def get_node_cost(graph: dict, node: tuple):
+    """ determine cost of a given node """
     x, y = node
     xtile, xpos = divmod(x, 100)
     ytile, ypos = divmod(y, 100)
@@ -29,6 +29,7 @@ def get_node_cost(graph, node):
 
 
 def best_first_search(graph, start, goal, mode=2):
+    """ Best first search of given graph from start to goal nodes """
     path = [start]
     cost = 0
 
@@ -57,34 +58,10 @@ with open(r'./input.txt') as f:
         for j, num in enumerate(line.strip()):
             grid[(i, j)] = int(num)
 
-# start = (0, 0)
-# goal = (99, 99)
-# path = [start]
-# cost = 0
-#
-# reached = {start: cost}
-# frontier = PriorityQueue()
-# frontier.put((cost, path))
-#
-# best_path = None
-# while not frontier.empty():
-#     cost, path = frontier.get()
-#     if path[-1] == goal:
-#         best_path = path
-#         break
-#
-#     for neighbor in get_neighbors(path[-1], mode=1):
-#         new_cost = cost + grid[neighbor]
-#         if (neighbor not in reached) or (new_cost < reached.get(neighbor, 0)):
-#             new_path = path + [neighbor]
-#             frontier.put((new_cost, new_path))
-#             reached[neighbor] = new_cost
-#
-
 # part 1
 answer = best_first_search(grid, (0, 0), (99, 99), mode=1)
 print(answer)
 
 # part 2
-answer2 = best_first_search(grid, (0, 0), (499, 499))
+answer2 = best_first_search(grid, (0, 0), (499, 499), mode=2)
 print(answer2)
