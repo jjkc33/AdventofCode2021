@@ -1,5 +1,6 @@
 import re
 import ast
+from itertools import permutations
 
 
 def add(n1, n2):
@@ -64,10 +65,18 @@ def reduce(n):
     return new
 
 
+def magnitude(num):
+    if isinstance(num, int):
+        return num
+    else:
+        return 3 * magnitude(num[0]) + 2 * magnitude(num[1])
+
+
 with open(r'./input.txt') as f:
     numbers = [line.strip() for line in f]
 
 
+# part 1
 number = numbers[0]
 for i, num in enumerate(numbers[1:]):
     new = add(number, num)
@@ -79,12 +88,17 @@ for i, num in enumerate(numbers[1:]):
 
     number = new
 
+print(magnitude(ast.literal_eval(number)))
 
-def magnitude(num):
-    if isinstance(num, int):
-        return num
-    else:
-        return 3 * magnitude(num[0]) + 2 * magnitude(num[1])
+# part 2
+largest_mag = 0
+for n1, n2 in permutations(numbers, 2):
+    new = add(n1, n2)
+    while True:
+        new2 = reduce(new)
+        if new2 == new:
+            break
+        new = new2
+    largest_mag = max(largest_mag, magnitude(ast.literal_eval(new)))
 
-
-print(number, magnitude(ast.literal_eval(number)))
+print(largest_mag)
