@@ -25,29 +25,33 @@ def explode_right(n, right_num):
 
 
 def is_pair(p):
-    if p[0] != '[' or p[-1] != ']':
+    if p[0] != '[':
         return False
-    return p[1].isdigit() and p[-2].isdigit()
+    m = re.search(r'\[\d+,\d+\]', p)
+    if m is None:
+        return False
+    return True
 
 
 def reduce(n):
     depth = 0
     new = ''
-    # pair_idx = (0, 0)
     for i in range(len(n)):
-        if is_pair(n[i:i + 5]) and depth >= 4:
-            new = explode_left(new, n[i + 1]) + explode_right(n[i + 5:], n[i + 3])
+        if is_pair(n[i:i + 7]) and depth >= 4:
+            m = re.search(r'\[\d+,\d+\]', n[i:i + 7])
+            pair_nums = re.findall(r'\d+', n[i:i + 7])
+            new = explode_left(new, pair_nums[0]) + explode_right(n[i + m.end():], pair_nums[1])
             break
 
         c = n[i]
+        # append character to new string
+        new += c
+        # check pair depth
         if c == '[':
             depth += 1
         elif c == ']':
             depth -= 1
 
-        # append character to new string
-        # if i not in range(*pair_idx):
-        new += c
     else:  # no explodes, check for splits
         nums = re.findall(r'\d+', n)
         for num in nums:
@@ -84,4 +88,3 @@ def magnitude(num):
 
 
 print(number, magnitude(ast.literal_eval(number)))
-# [[[[6,6],[7,7]],[[6,7],[6,7]]],[[[6,6],[6,0]],[[7,8],[8,8]]]] 3920
