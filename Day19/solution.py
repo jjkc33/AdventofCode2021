@@ -60,7 +60,9 @@ def rotate_and_shift(basis, shift, coords):
 
 # start with first beacon
 found_beacons = scanners[0]
+scanner_positions = [(0, 0, 0)]
 scanner_indices = list(range(1, len(scanners)))
+
 while scanner_indices:
     left_over = []
     for i in scanner_indices:
@@ -83,8 +85,11 @@ while scanner_indices:
                 if len(translations) == 1:
                     shift = translations.pop()
                     additional_beacons = [rotate_and_shift(trans, shift, b) for b in beacons]
+                    # part 2: save scanner positions
+                    scanner_positions.append(shift)
                     break
 
+            # part 1: add newfound beacons to identified beacon list
             found_beacons.extend(additional_beacons)
         else:
             left_over.append(i)
@@ -94,3 +99,11 @@ while scanner_indices:
 
 # part 1
 print(len(set(found_beacons)))
+
+# part 2
+print(scanner_positions)
+largest_distance = 0
+for p1, p2 in combinations(scanner_positions, 2):
+    largest_distance = max(largest_distance, manhattan_distance(p1, p2))
+print(largest_distance)
+# 12123 too low
