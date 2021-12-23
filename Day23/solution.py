@@ -1,20 +1,5 @@
+from functools import lru_cache
 
-rooms = []
-with open(r'./input.txt') as f:
-    for i, line in enumerate(f):
-        if i == 1:
-            hallway = line.strip().replace('#', '')
-        elif i in (2, 3):
-            rooms.append(line.strip().replace('#', ''))
-
-
-print(hallway)
-print(rooms)
-
-rooms = 'BACDBCDA'
-
-state = ('.', '.', ('B', 'A'), '.', ('C', 'D'), '.', ('B', 'C'), '.', ('D', 'A'), '.', '.')
-END_STATE = ('.', '.', ('A', 'A'), '.', ('B', 'B'), '.', ('C', 'C'), '.', ('D', 'D'), '.', '.')
 
 GOALS = {
     'A': 2,
@@ -31,50 +16,18 @@ COSTS = {
 }
 
 
-# def open_hallway_spots(s):
-#     hallway, rooms = s
-#     open_spots = []
-#     for i in (0, 1, 3, 5, 7, 9, 10):  # cannot stop above a room (even numbers)
-#         if hallway[i] == '.':
-#             open_spots.append(i)
-#
-#     return open_spots
-#
-#
-# def open_room_spots(s):
-#     hallway, rooms = s
-#     open_spots = []
-#     if rooms.isalpha():  # all rooms full
-#         return open_spots
-#
-#     for i, c in enumerate(rooms):
-#         if c == '.':
-#             open_spots.append(i)
-#
-#     return open_spots
-#
-#
-# def movable_amphipods_old(s):
-#     hallway, rooms = s
-#
-#     room_amphipods = []
-#     for i in range(0, len(rooms), 2):
-#         if rooms[i + 1] == GOAL[i + 1]:  # back space of room is correct
-#             if rooms[i] == GOAL[i]:  # front space of room is correct
-#                 continue
-#             elif rooms[i] != '.':  # front space is not empty
-#                 room_amphipods.append((rooms[i], i))
-#         elif rooms[i] == '.':  # front space is empty
-#             room_amphipods.append((rooms[i + 1], i + 1))
-#         else:
-#             room_amphipods.append((rooms[i], i))
-#
-#     hallway_amphipods = []
-#     for i, c in enumerate(hallway):
-#         if c != '.':  # amphipod in hallway space
-#             hallway_amphipods.append((c, i))
-#
-#     return hallway_amphipods, room_amphipods
+def build_initial_state(hallway, rooms):
+    state = []
+    for i in range(len(hallway)):
+        if i in (2, 4, 6, 8):  # room
+            room = []
+            for j in range(len(rooms)):
+                room.append(rooms[j][i // 2 - 1])
+            state.append(tuple(room))
+        else:
+            state.append('.')
+
+    return tuple(state)
 
 
 def available_moves(s: tuple):
@@ -169,8 +122,7 @@ def eligible_moves(s: tuple, pod_type: str, pod_idx: int):
             if i == GOALS[pod_type]:  # correct room
                 for j in range(len(space) - 1, -1, -1):  # find furthest open space
                     if space[j] == '.':
-                        moves.append((i, j))
-                        break
+                        return [(i, j)]
                     elif space[j] != pod_type:
                         break
         elif space != '.':  # hallway blocked
@@ -185,7 +137,8 @@ def eligible_moves(s: tuple, pod_type: str, pod_idx: int):
             if i == GOALS[pod_type]:  # correct room
                 for j in range(len(space) - 1, -1, -1):  # find furthest open space
                     if space[j] == '.':
-                        moves.append((i, j))
+                        return [(i, j)]
+                    elif space[j] != pod_type:
                         break
         elif space != '.':  # hallway blocked
             break
@@ -195,18 +148,58 @@ def eligible_moves(s: tuple, pod_type: str, pod_idx: int):
     return moves
 
 
-def organize_amphipods(state):
-    if state == END_STATE:
+@lru_cache(maxsize=2 ** 20)
+def organize_amphipods_part1(state):
+    if state == END_STATE_P1:
         return 0
 
-    costs = []
+    costs = [2**63 - 1]
     for next_state, cost in available_moves(state):
-        print(next_state)
-        new_cost = cost + organize_amphipods(next_state)
+        new_cost = cost + organize_amphipods_part1(next_state)
         costs.append(new_cost)
 
-    return costs
+    return min(costs)
 
+
+@lru_cache(maxsize=2 ** 21)
+def organize_amphipods_part2(state):
+    if state == END_STATE_P2:
+        return 0
+
+    costs = [2**63 - 1]
+    for next_state, cost in available_moves(state):
+        new_cost = cost + organize_amphipods_part2(next_state)
+        costs.append(new_cost)
+
+    return min(costs)
+
+
+rooms = []
+with open(r'./input.txt') as f:
+    for i, line in enumerate(f):
+        if i == 1:
+            hallway = line.strip().replace('#', '')
+        elif i in (2, 3):
+            rooms.append(line.strip().replace('#', ''))
+
+
+# part 1
+END_STATE_P1 = ('.', '.', ('A', 'A'), '.', ('B', 'B'), '.', ('C', 'C'), '.', ('D', 'D'), '.', '.')
+
+state = build_initial_state(hallway, rooms)
 print(state)
-costs = organize_amphipods(state)
-print(min(costs))
+answer = organize_amphipods_part1(state)
+print(answer)
+
+# part 2
+END_STATE_P2 = ('.', '.', ('A', 'A', 'A', 'A'), '.', ('B', 'B', 'B', 'B'),
+                '.', ('C', 'C', 'C', 'C'), '.', ('D', 'D', 'D', 'D'), '.', '.')
+
+
+rooms.insert(1, 'DCBA')
+rooms.insert(2, 'DBAC')
+
+state2 = build_initial_state(hallway, rooms)
+print(state2)
+answer2 = organize_amphipods_part2(state2)
+print(answer2)
