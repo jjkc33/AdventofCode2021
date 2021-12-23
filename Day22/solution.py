@@ -1,5 +1,46 @@
 import re
-import itertools
+from collections import Counter
+
+
+def find_intersection(c1, c2):
+    """Determine intersection of two cubes, c1 and c2"""
+    c3 = []
+    for i in range(0, len(c1), 2):
+        min_pos = max(c1[i], c2[i])
+        max_pos = min(c1[i + 1], c2[i + 1])
+
+        if min_pos > max_pos:  # no intersection found
+            return None
+
+        c3.extend([min_pos, max_pos])
+
+    return tuple(c3)
+
+
+def volume(cube):
+    """Calculate volume of a given cube"""
+    v = 1
+    for i in range(0, len(cube), 2):
+        v *= cube[i + 1] - cube[i] + 1
+    return v
+
+
+def find_lit_cubes(states, coords, part1=False):
+    cubes = Counter()
+    for s, c in zip(states, coords):
+        if part1 and any(abs(i) > 50 for i in c):
+            continue
+
+        overlaps = Counter()
+        for cube, count in cubes.items():
+            intersect = find_intersection(cube, c)
+            if intersect:  # avoid double counting intersecting cubes
+                overlaps[intersect] -= count
+
+        cubes[c] += s
+        cubes.update(overlaps)
+
+    return cubes
 
 
 states, coords = [], []
@@ -12,16 +53,11 @@ with open(r'./input.txt') as f:
 
 
 # part 1
-lights = set()
-for s, c in zip(states, coords):
-    if any(abs(i) > 50 for i in c):
-        continue
+part1cubes = find_lit_cubes(states, coords, part1=True)
+part1lit = sum(v * volume(c) for c, v in part1cubes.items())
+print(part1lit)
 
-    x1, x2, y1, y2, z1, z2 = c
-    positions = {pos for pos in itertools.product(range(x1, x2 + 1), range(y1, y2 + 1), range(z1, z2 + 1))}
-    if s == 1:  # on
-        lights.update(positions)
-    else:  # off
-        lights.difference_update(positions)
-
-print(len(lights))
+# part 2
+part2cubes = find_lit_cubes(states, coords)
+part2lit = sum(v * volume(c) for c, v in part2cubes.items())
+print(part2lit)
