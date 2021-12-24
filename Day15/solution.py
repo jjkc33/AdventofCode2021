@@ -1,4 +1,4 @@
-from queue import PriorityQueue
+import heapq
 
 
 def get_neighbors(node: tuple, mode: int = 2):
@@ -34,19 +34,19 @@ def best_first_search(graph, start, goal, mode=2):
     cost = 0
 
     reached = {start: cost}
-    frontier = PriorityQueue()
-    frontier.put((cost, path))
+    frontier = []
+    heapq.heappush(frontier, (cost, path))
 
-    while not frontier.empty():
-        cost, path = frontier.get()
+    while len(frontier) > 0:
+        cost, path = heapq.heappop(frontier)
         if path[-1] == goal:
             break
 
         for neighbor in get_neighbors(path[-1], mode=mode):
             new_cost = cost + get_node_cost(graph, neighbor)
-            if (neighbor not in reached) or (new_cost < reached.get(neighbor, 0)):
+            if neighbor not in reached:
                 new_path = path + [neighbor]
-                frontier.put((new_cost, new_path))
+                heapq.heappush(frontier, (new_cost, new_path))
                 reached[neighbor] = new_cost
 
     return reached[goal]
