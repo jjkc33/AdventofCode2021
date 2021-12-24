@@ -1,3 +1,4 @@
+import math
 import itertools
 from functools import lru_cache
 
@@ -32,8 +33,6 @@ answer = min(p1_score, p2_score) * roll_count
 print(answer)
 
 # part 2
-
-
 """
 outcomes of 3 sided die, rolled thrice
     3: 1/27
@@ -47,7 +46,8 @@ outcomes of 3 sided die, rolled thrice
 
 
 # 10 positions for both p1 and p2, 21 scores for both p1 and p2
-@lru_cache(maxsize=10*10*21*21)
+# rounded up to nearest power of 2 (better performance)
+@lru_cache(maxsize=2**math.ceil(math.log2(10*10*21*21)))
 def quantum(p1_pos, p1_score, p2_pos, p2_score):
     if p1_score > 20:
         return 1, 0
@@ -63,7 +63,7 @@ def quantum(p1_pos, p1_score, p2_pos, p2_score):
 
     return wins
 
-# part 2
+
 p1, p2 = starting_pos
 p1_score, p2_score = 0, 0
 score = quantum(p1, p1_score, p2, p2_score)
