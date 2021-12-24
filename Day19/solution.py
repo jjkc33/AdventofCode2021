@@ -3,6 +3,9 @@ from itertools import combinations, permutations
 from collections import defaultdict
 
 
+# TODO reimplement with checking all combinations of scanner pairs
+# TODO then repeatedly iterate, reducing all pairs to a master list of scanners/beacons
+
 scanners = []
 with open(r'./input.txt') as f:
     beacons = []
@@ -91,6 +94,7 @@ while scanner_indices:
 
             # part 1: add newfound beacons to identified beacon list
             found_beacons.extend(additional_beacons)
+            found_beacons = list(set(found_beacons))
         else:
             left_over.append(i)
 
@@ -98,12 +102,10 @@ while scanner_indices:
 
 
 # part 1
-print(len(set(found_beacons)))
+n_unique_beacons = len(set(found_beacons))
+print(n_unique_beacons)
 
 # part 2
-print(scanner_positions)
-largest_distance = 0
-for p1, p2 in combinations(scanner_positions, 2):
-    largest_distance = max(largest_distance, manhattan_distance(p1, p2))
+largest_distance = max(manhattan_distance(*p) for p in combinations(scanner_positions, 2))
 print(largest_distance)
-# 12123 too low
+

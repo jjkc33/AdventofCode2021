@@ -1,6 +1,10 @@
 from functools import lru_cache
 
 
+# TODO clean up functions, reduce duplicate code
+# TODO alternative solution: replace DFS + memoization with BFS + priority queue
+
+
 GOALS = {
     'A': 2,
     'B': 4,

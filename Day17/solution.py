@@ -6,9 +6,6 @@ with open(r'./input.txt') as f:
 
 coords = re.findall(r'-?\d+', data)
 coords = [int(c) for c in coords]
-print(coords)
-
-
 xmin, xmax, ymin, ymax = coords
 
 
@@ -47,6 +44,7 @@ def test_launch(pos, vel):
     return max_height, target_hit
 
 
+# TODO check x for valid step counts then check y
 heights = []
 for x in range(xmax + 1):
     for y in range(ymin - 1, abs(ymin) + 1):
